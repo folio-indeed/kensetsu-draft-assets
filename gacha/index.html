@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="ja"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<title>建設ドラフト ガチャ</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden;background:#0c0814;font-family:-apple-system,'Hiragino Sans',sans-serif}
+#stage{position:relative;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center}
+/* 背景の回転レイ */
+#rays{position:absolute;inset:-50%;background:repeating-conic-gradient(from 0deg,rgba(255,215,80,.10) 0deg 5deg,transparent 5deg 10deg);animation:spin 24s linear infinite;opacity:.7}
+@keyframes spin{to{transform:rotate(360deg)}}
+#pack{position:relative;width:min(64vw,300px);z-index:2;filter:drop-shadow(0 0 24px rgba(255,215,80,.45));transition:transform .1s}
+#tap{margin-top:26px;color:#ffd94e;font-size:20px;font-weight:800;z-index:2;animation:pulse 1.1s ease-in-out infinite;text-shadow:0 2px 8px #000}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.55;transform:scale(.94)}}
+.shake1{animation:sh .09s linear infinite}
+.shake2{animation:sh .05s linear infinite}
+@keyframes sh{0%{transform:translate(0,0) rotate(0)}25%{transform:translate(-7px,3px) rotate(-2.4deg)}50%{transform:translate(6px,-4px) rotate(2deg)}75%{transform:translate(-4px,-5px) rotate(-1.6deg)}100%{transform:translate(5px,4px) rotate(2.2deg)}}
+#aura{position:absolute;inset:0;z-index:1;opacity:0;transition:opacity .4s;pointer-events:none}
+#flash{position:absolute;inset:0;background:#fff;opacity:0;z-index:6;pointer-events:none}
+#card{position:absolute;z-index:4;width:min(86vw,430px);opacity:0;transform:scale(.2) rotate(-8deg);border-radius:16px;box-shadow:0 0 60px rgba(255,215,80,.8)}
+#card.show{animation:reveal .65s cubic-bezier(.2,1.6,.4,1) forwards}
+@keyframes reveal{to{opacity:1;transform:scale(1) rotate(0)}}
+#fx{position:absolute;inset:0;z-index:5;pointer-events:none}
+#back{position:absolute;bottom:24px;left:50%;transform:translateX(-50%);z-index:7;display:none;background:#ffd94e;color:#201400;font-weight:800;font-size:17px;border:none;border-radius:28px;padding:14px 34px;box-shadow:0 4px 18px rgba(0,0,0,.6)}
+#rar{position:absolute;top:9%;z-index:5;font-size:15vw;font-weight:900;color:#fff;opacity:0;text-shadow:0 0 30px currentColor}
+#rar.show{animation:rin .5s cubic-bezier(.2,1.8,.4,1) forwards}
+@keyframes rin{from{opacity:0;transform:scale(3)}to{opacity:1;transform:scale(1)}}
+</style></head>
+<body>
+<div id="stage">
+  <div id="rays"></div>
+  <div id="aura"></div>
+  <img id="pack" src="../gacha_cards/pack.png" alt="">
+  <div id="tap">▼ タップして開封 ▼</div>
+  <div id="rar"></div>
+  <img id="card" src="" alt="">
+  <canvas id="fx"></canvas>
+  <button id="back" onclick="closeMe()">トークにもどる ▶</button>
+</div>
+<script>
+const P=new URLSearchParams(location.search);
+const t=P.get('t')||'n_ticket2';
+const RAR = t.startsWith('ssr')?'SSR':t.startsWith('sr')?'SR':t.startsWith('r_')?'R':'N';
+const CONF={N:{shake:1100,color:'#57a8ff',conf:40,strobe:false},
+            R:{shake:1700,color:'#ff5d5d',conf:90,strobe:false},
+            SR:{shake:2500,color:'#ffd94e',conf:160,strobe:false},
+            SSR:{shake:3600,color:'#ff5df0',conf:280,strobe:true}}[RAR];
+const card=document.getElementById('card'); card.src='../gacha_cards/'+t+'.png';
+const pack=document.getElementById('pack'),tap=document.getElementById('tap'),
+aura=document.getElementById('aura'),flash=document.getElementById('flash'),
+rar=document.getElementById('rar'),back=document.getElementById('back');
+let AC=null;
+function tone(f,dur,when,type='square',vol=.12){const o=AC.createOscillator(),g=AC.createGain();o.type=type;o.frequency.value=f;g.gain.setValueAtTime(vol,AC.currentTime+when);g.gain.exponentialRampToValueAtTime(.001,AC.currentTime+when+dur);o.connect(g).connect(AC.destination);o.start(AC.currentTime+when);o.stop(AC.currentTime+when+dur+.05)}
+function drum(ms){const n=Math.floor(ms/90);for(let i=0;i<n;i++)tone(110+Math.random()*40,.06,i*.09,'square',.10)}
+function fanfare(){const seq=RAR==='SSR'?[523,659,784,1047,1319,1568]:RAR==='SR'?[523,659,784,1047]:[523,784];seq.forEach((f,i)=>{tone(f,.28,i*.13,'triangle',.22);tone(f/2,.28,i*.13,'sine',.12)})}
+// 紙吹雪
+const cv=document.getElementById('fx'),cx2=cv.getContext('2d');let parts=[];
+function boom(n){cv.width=innerWidth;cv.height=innerHeight;
+ const cols=RAR==='SSR'?['#ff5df0','#5da8ff','#5dff8f','#ffd94e','#ff5d5d','#ffffff']:[CONF.color,'#ffd94e','#ffffff'];
+ for(let i=0;i<n;i++)parts.push({x:innerWidth/2,y:innerHeight*.45,vx:(Math.random()-.5)*16,vy:-Math.random()*15-4,g:.35,s:4+Math.random()*7,c:cols[i%cols.length],r:Math.random()*6.28,vr:(Math.random()-.5)*.4,life:110+Math.random()*60});
+ if(!boom.running){boom.running=true;loop()}}
+function loop(){cx2.clearRect(0,0,cv.width,cv.height);parts=parts.filter(p=>p.life-->0);
+ for(const p of parts){p.x+=p.vx;p.y+=p.vy;p.vy+=p.g;p.r+=p.vr;cx2.save();cx2.translate(p.x,p.y);cx2.rotate(p.r);cx2.fillStyle=p.c;cx2.fillRect(-p.s/2,-p.s/2,p.s,p.s*1.6);cx2.restore()}
+ if(parts.length)requestAnimationFrame(loop);else boom.running=false}
+let opened=false;
+document.getElementById('stage').addEventListener('click',()=>{
+ if(opened)return;opened=true;
+ AC=new (window.AudioContext||window.webkitAudioContext)();
+ tap.style.display='none';
+ pack.className='shake1';drum(CONF.shake);
+ aura.style.background='radial-gradient(circle at 50% 45%, '+CONF.color+'55 0%, transparent 60%)';aura.style.opacity=1;
+ setTimeout(()=>{pack.className='shake2';
+  if(CONF.strobe){let i=0;const cols=['#ff5df0','#5da8ff','#5dff8f','#ffd94e'];
+   const iv=setInterval(()=>{aura.style.background='radial-gradient(circle at 50% 45%, '+cols[i++%4]+'77 0%, transparent 62%)'},130);
+   setTimeout(()=>clearInterval(iv),CONF.shake*0.5)}
+ },CONF.shake*0.5);
+ setTimeout(open,CONF.shake+200);
+});
+function open(){
+ flash.style.transition='none';flash.style.opacity=1;
+ tone(1200,.4,0,'sawtooth',.2);
+ setTimeout(()=>{pack.style.display='none';
+  flash.style.transition='opacity .5s';flash.style.opacity=0;
+  rar.textContent=RAR;rar.style.color=CONF.color;rar.className='show';
+  card.className='show';boom(CONF.conf);fanfare();
+  if(RAR==='SSR')setTimeout(()=>boom(160),700);
+  setTimeout(()=>{back.style.display='block'},900);
+ },240)}
+function closeMe(){try{if(window.liff&&liff.isInClient()){liff.closeWindow();return}}catch(e){}
+ window.close();history.back()}
+document.body.appendChild(flash);
+</script>
+</body></html>
