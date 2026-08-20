@@ -29,9 +29,9 @@ const P=new URLSearchParams(location.search);
 const t=P.get('t')||'n_ticket2';
 const TK=P.get('tk')||'';
 const PRIZES={
- n_ticket2:{rar:'N', label:'ドラフト券 +2枚', how:'毎週金曜の抽選口数が増えました。何もしなくても自動でエントリーされます。'},
- n_ticket3:{rar:'N', label:'ドラフト券 +3枚', how:'毎週金曜の抽選口数が増えました。何もしなくても自動でエントリーされます。'},
- r_ticket5:{rar:'R', label:'ドラフト券 +5枚', how:'毎週金曜の抽選口数がドンと増えました。自動でエントリーされます。'},
+ n_ticket2:{rar:'N', label:'PayPayくじ券 +2枚', how:'毎週金曜、PayPayポイントのくじ引きに この枚数ぶん自動で参加できます。'},
+ n_ticket3:{rar:'N', label:'PayPayくじ券 +3枚', how:'毎週金曜、PayPayポイントのくじ引きに この枚数ぶん自動で参加できます。'},
+ r_ticket5:{rar:'R', label:'PayPayくじ券 +5枚', how:'毎週金曜のPayPayくじに参加できる券がドンと増えました。自動参加です。'},
  sr_redbull:{rar:'SR', label:'レッドブル 1本', how:'現場スタッフに この画面を見せると その場で受け取れます。（いない場合は後日ご案内）'},
  ssr_pp500:{rar:'SSR', label:'PayPayポイント 500円', how:'ギフトコードがLINEのトークに届きます（当日中）。'},
  ssr_pp1000:{rar:'SSR', label:'PayPayポイント 1,000円', how:'ギフトコードがLINEのトークに届きます（当日中）。'},
@@ -123,7 +123,7 @@ function showResult(){
  document.getElementById('rlabel').style.color=RARCOL;
  document.getElementById('rprize').textContent=PR.label;
  document.getElementById('rhow').textContent=PR.how;
- document.getElementById('rtk').textContent=TK?('現在のドラフト券: '+TK+'枚（毎週金曜 自動抽選）'):'';
+ document.getElementById('rtk').textContent=TK?('PayPayくじ券: '+TK+'枚（毎週金曜 自動でくじ参加）'):'';
  r.classList.add('show');
 }
 addEventListener('pointerdown',()=>{if(scene==='idle')chargeStart()});
