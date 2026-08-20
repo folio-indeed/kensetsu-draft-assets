@@ -124,7 +124,7 @@ function showResult(){
  document.getElementById('rprize').textContent=PR.label;
  document.getElementById('rhow').textContent=PR.how;
  document.getElementById('rtk').textContent=TK?('PayPayくじ券: '+TK+'枚（毎週金曜 自動でくじ参加）'):'';
- r.classList.add('show');
+ r.classList.add('show');pingOpen();
 }
 addEventListener('pointerdown',()=>{if(scene==='idle')chargeStart()});
 
@@ -259,5 +259,11 @@ function goBack(ev){ev.preventDefault();
  try{location.href='line://nv/chat'}catch(e){}
  setTimeout(function(){try{location.href='https://line.me/R/nv/chat'}catch(e){}},400);
  setTimeout(function(){var b=document.getElementById('btn');if(b){b.textContent='↖ 左上の「×」でもどれます';b.removeAttribute('href');}},1500);}
+
+var UID=P.get('u')||'', CB=P.get('cb')||'';
+var pinged=false;
+function pingOpen(){ if(pinged||!UID||!CB) return; pinged=true;
+ try{ fetch(CB+'?open='+encodeURIComponent(UID), {mode:'no-cors'}); }catch(e){}
+}
 </script>
 </body></html>
