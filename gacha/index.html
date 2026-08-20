@@ -251,6 +251,7 @@ function draw(now){
 }
 requestAnimationFrame(draw);
 function closeMe(){try{if(window.liff&&liff.isInClient()){liff.closeWindow();return}}catch(e){}
- window.close();history.back()}
+ try{window.close()}catch(e){}
+ location.href='line://nv/chat'}
 </script>
 </body></html>
